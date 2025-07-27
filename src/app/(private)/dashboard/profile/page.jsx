@@ -1,7 +1,7 @@
 "use client";
 
 import UpdateProfile from "@/components/profile/UpdateProfile";
-import Modal from "@/components/ui/Modal";
+import Modal from "@/components/UI/Modal";
 import {
   useGetProfilePicQuery,
 

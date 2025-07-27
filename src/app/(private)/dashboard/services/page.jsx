@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import Modal from '@/components/ui/Modal'
-import Table from '@/components/ui/Table'
+import Modal from '@/components/UI/Modal'
+import Table from '@/components/UI/Table'
 import { Edit, Plus, Trash, View } from 'lucide-react'
 import SkillForm from '@/components/skills and services/SkillForm'
 import { useGetServicesQuery, useDeleteServiceMutation } from '@/features/services/serviveApiSlice'

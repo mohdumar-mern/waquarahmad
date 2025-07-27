@@ -6,7 +6,7 @@ import { useSelector } from "react-redux";
 import { selectServiceById } from "@/features/services/serviveApiSlice";
 import { selectSkillById } from "@/features/skills/skillApiSlice";
 import { Edit } from "lucide-react";
-import Modal from "@/components/ui/Modal";
+import Modal from "@/components/UI/Modal";
 import SkillForm from "@/components/skills and services/SkillForm";
 
 const ServiceCard = ({ serviceId: seId, skillId: skId }) => {

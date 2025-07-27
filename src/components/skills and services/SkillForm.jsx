@@ -3,7 +3,7 @@
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/UI/Button";
 import {
   Form,
   FormField,
@@ -11,9 +11,9 @@ import {
   FormLabel,
   FormControl,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+} from "@/components/UI/form";
+import { Input } from "@/components/UI/input";
+import { Textarea } from "@/components/UI/textarea";
 
 import {
   useAddSkillMutation,

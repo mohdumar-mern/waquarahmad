@@ -4,7 +4,7 @@ import { useSelector } from "react-redux"
 import { useCallback, useMemo, useState } from "react"
 import { selectProjectById } from "@/features/projects/projectApi"
 import { Edit } from "lucide-react"
-import Modal from "@/components/ui/Modal"
+import Modal from "@/components/UI/Modal"
 import AddProject from "@/components/projects/AddProject"
 
 const ProjectCard = ({ project }) => {
