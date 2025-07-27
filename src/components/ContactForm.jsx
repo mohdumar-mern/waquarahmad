@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { Button } from "@/components/UI/Button";
+import { Button } from "@/components/ui/Button";
 import {
   Form,
   FormField,
@@ -12,9 +12,9 @@ import {
   FormLabel,
   FormControl,
   FormMessage,
-} from "@/components/UI/form";
-import { Input } from "@/components/UI/input";
-import { Textarea } from "@/components/UI/textarea";
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { useAddContactMutation } from "@/features/contacts/contactApiSlice";
 
 // ✅ Zod schema
