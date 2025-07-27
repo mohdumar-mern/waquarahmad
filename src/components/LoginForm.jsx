@@ -53,7 +53,6 @@ export default function LoginForm() {
         // ✅ Optional: console.log or toast message
         router.push('/dashboard')
       }
-
       form.reset()
     } catch (error) {
       console.error('Login failed:', error)

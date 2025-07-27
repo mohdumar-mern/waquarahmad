@@ -1,91 +1,120 @@
+// src/features/projects/projectApiSlice.js
+
 import { apiSlice } from "../api/apiSlice";
 import { createEntityAdapter, createSelector } from "@reduxjs/toolkit";
 
-// Adapter setup
-const projectAdapter = createEntityAdapter();
-const initialState = projectAdapter.getInitialState();
+// Entity Adapter for projects
+const projectAdapter = createEntityAdapter({
+  selectId: (project) => project._id || project.id,
+});
 
-// ✅ API slice injection
+const initialState = projectAdapter.getInitialState({
+  pagination: {
+    totalDocs: 0,
+    limit: 6,
+    totalPages: 0,
+    currentPage: 1,
+    hasPrevPage: false,
+    hasNextPage: false,
+    prevPage: null,
+    nextPage: null,
+  },
+});
+
+// Inject endpoints
 export const projectApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getProjects: builder.query({
-      query: () => "/projects",
+      query: ({ page = 1, limit = 6, search = "", featured = "" } = {}) =>
+        `/projects?page=${page}&limit=${limit}&search=${search}&featured=${featured}`,
+
       validateStatus: (response, result) =>
-        response.status === 200 && !result.isError,
-      keepUnusedDataFor: 5,
+        response.status === 200 && !result?.isError,
+
+      // Cache for 5 minutes
+      keepUnusedDataFor: 300,
+
       transformResponse: (responseData) => {
-        const projects = responseData.data || responseData; // fallback if API doesn't wrap in data
+        const projects = responseData?.data || [];
+        const pagination = responseData?.pagination || {};
 
-        if (!Array.isArray(projects)) {
-          console.error("❌ Unexpected projects format:", projects);
-          return initialState;
-        }
+        // Normalize data with pagination
+        const normalized = projectAdapter.setAll(
+          projectAdapter.getInitialState(),
+          projects
+        );
 
-        const loadedProjects = projects.map((project) => ({
-          ...project,
-          id: project._id,
-        }));
-
-        return projectAdapter.setAll(initialState, loadedProjects);
+        return {
+          ...normalized,
+          pagination,
+        };
       },
+
       providesTags: (result) =>
         result?.ids
           ? [
-            { type: "Project", id: "LIST" },
-            ...result.ids.map((id) => ({ type: "Project", id })),
-          ]
+              { type: "Project", id: "LIST" },
+              ...result.ids.map((id) => ({ type: "Project", id })),
+            ]
           : [{ type: "Project", id: "LIST" }],
     }),
+
     addProject: builder.mutation({
-      query: (project) => ({
+      query: (newProject) => ({
         url: "/projects",
         method: "POST",
-        body: project,
+        body: newProject,
       }),
       invalidatesTags: [{ type: "Project", id: "LIST" }],
     }),
+
     updateProject: builder.mutation({
-      query: ({id, body}) => ({
+      query: ({ id, body }) => ({
         url: `/projects/${id}`,
         method: "PUT",
-        body: body,
+        body,
       }),
-      invalidatesTags: (
-        result,
-        error,
-        arg
-      ) => {
-        if (error) {
-          console.error("❌ Failed to update project:", error);
-          return [];
-        }
-        return [{ type: "Project", id: arg.id }];
-      },
+      invalidatesTags: (result, error, arg) =>
+        error
+          ? []
+          : [
+              { type: "Project", id: arg.id },
+              { type: "Project", id: "LIST" },
+            ],
     }),
-
   }),
 });
 
-export const { useGetProjectsQuery,
+// Hooks
+export const {
+  useGetProjectsQuery,
   useAddProjectMutation,
-  useUpdateProjectMutation
- } = projectApiSlice;
+  useUpdateProjectMutation,
+} = projectApiSlice;
 
-// Selector to get raw result (status, data, etc.)
+// Selectors
 export const selectProjectsResult =
   projectApiSlice.endpoints.getProjects.select();
 
-// ✅ Create memoized selector for normalized data
-const selectProjectsData = createSelector(
+// Memoized selector to get normalized projects + pagination
+export const selectProjectsData = createSelector(
   selectProjectsResult,
   (projectsResult) => projectsResult?.data ?? initialState
 );
 
-// ✅ Export selectors from adapter
+// Export entity adapter selectors
+const projectSelectors = projectAdapter.getSelectors((state) => 
+  selectProjectsData(state) ?? projectAdapter.getInitialState()
+);
+
 export const {
   selectAll: selectAllProjects,
   selectById: selectProjectById,
   selectIds: selectProjectIds,
-} = projectAdapter.getSelectors(
-  (state) => selectProjectsData(state)
+} = projectSelectors;
+
+// Custom selector to get pagination state
+export const selectProjectsPagination = createSelector(
+  selectProjectsData,
+  (data) => data?.pagination ?? initialState.pagination
 );

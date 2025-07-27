@@ -1,46 +1,45 @@
 'use client'
 
+import { useSelector } from "react-redux"
+import { useCallback, useMemo, useState } from "react"
 import { selectProjectById } from "@/features/projects/projectApi"
 import { Edit } from "lucide-react"
-import { useSelector } from "react-redux"
 import Modal from "@/components/ui/Modal"
 import AddProject from "@/components/projects/AddProject"
-import { useCallback, useState } from "react"
 
-const ProjectCard = ({ projectId:id }) => {
-  const [showModal, setShowModal] = useState(false)
-  const [isEditing, setIsEditing] = useState(false)
-  const [projectId, setProjectId] = useState(null)
+const ProjectCard = ({ project }) => {
+  
+console.log(project)
+  const [modalState, setModalState] = useState({ show: false, isEditing: false })
 
-  const project = useSelector((state) => selectProjectById(state, id))
-
-
-
-  const editHandler = useCallback((id) => {
-    setIsEditing(true)
-    setProjectId(id)
-    setShowModal(true)
+  const openEditModal = useCallback(() => {
+    setModalState({ show: true, isEditing: true })
   }, [])
-  if (!project) return null
 
-  const {_id, ytlink, thumbnail, title, description, softwares, createdAt, updatedAt } = project
+  const closeModal = useCallback(() => {
+    setModalState({ show: false, isEditing: false })
+  }, [])
 
-  const getEmbedUrl = (url) => {
-    const match = url?.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&]+)/)
+  const embedUrl = useMemo(() => {
+    if (!project?.ytlink?.trim()) return null
+    const match = project.ytlink.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&]+)/)
     return match?.[1] ? `https://www.youtube.com/embed/${match[1]}` : null
-  }
+  }, [project?.ytlink])
 
-  const embedUrl = getEmbedUrl(ytlink)
-
-  const formatDate = (date) =>
+  const formatDate = date =>
     new Date(date).toLocaleDateString("en-IN", {
       year: "numeric",
       month: "short",
       day: "numeric",
     })
 
+  if (!project) return null
+
+  const { _id, thumbnail, title, description, softwares, createdAt, updatedAt } = project
+
   return (
     <div className="bg-white rounded-xl shadow hover:shadow-lg border transition-all overflow-hidden">
+      {/* Media */}
       <div className="w-full">
         {embedUrl ? (
           <div className="aspect-video">
@@ -50,6 +49,7 @@ const ProjectCard = ({ projectId:id }) => {
               frameBorder="0"
               allowFullScreen
               title={title}
+              loading="lazy"
             />
           </div>
         ) : (
@@ -57,22 +57,22 @@ const ProjectCard = ({ projectId:id }) => {
             src={thumbnail?.url}
             alt={title}
             className="w-full h-60 object-cover"
+            loading="lazy"
           />
         )}
       </div>
 
+      {/* Content */}
       <div className="p-4 space-y-2">
-        <h3 className="text-lg font-semibold text-gray-800 line-clamp-1">
-          {title}
-        </h3>
+        <h3 className="text-lg font-semibold text-gray-800 line-clamp-1">{title}</h3>
         <p className="text-sm text-gray-600 line-clamp-3">{description}</p>
 
         {/* Tags */}
         {softwares?.length > 0 && (
           <div className="flex flex-wrap gap-2 mt-2">
-            {softwares.map((tool, i) => (
+            {softwares.map((tool, index) => (
               <span
-                key={i}
+                key={index}
                 className="bg-gray-200 text-gray-800 text-xs px-3 py-1 rounded-full"
               >
                 {tool}
@@ -81,27 +81,32 @@ const ProjectCard = ({ projectId:id }) => {
           </div>
         )}
 
-        {/* Dates */}
-        <div className="text-xs text-gray-400 flex justify-between pt-2">
+        {/* Footer */}
+        <div className="text-xs text-gray-400 flex justify-between pt-2 items-center">
           <div className="flex flex-col">
             <span>Created: {formatDate(createdAt)}</span>
             <span>Updated: {formatDate(updatedAt)}</span>
           </div>
-          <button onClick={() => editHandler(_id)} className="text-blue-600 hover:underline cursor-pointer"><Edit size={24} /></button>
-
-
+          <button
+            onClick={openEditModal}
+            className="text-blue-600 hover:underline flex items-center gap-1"
+            title="Edit Project"
+          >
+            <Edit size={18} />
+          </button>
         </div>
       </div>
 
-        {showModal && (
-              <Modal
-                isOpen={showModal}
-                onClose={() => setShowModal(false)}
-                title={isEditing ? "Edit Project" : "Add Project"}
-              >
-                <AddProject projectId={projectId} isEditing={isEditing} onClose={() => setShowModal(false)} />
-              </Modal>
-            )}
+      {/* Modal */}
+      {modalState.show && (
+        <Modal isOpen={modalState.show} onClose={closeModal} title="Edit Project">
+          <AddProject
+            projectId={_id}
+            isEditing={modalState.isEditing}
+            onClose={closeModal}
+          />
+        </Modal>
+      )}
     </div>
   )
 }
