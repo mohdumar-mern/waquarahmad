@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import Modal from '@/components/UI/Modal'
-import Table from '@/components/UI/Table'
+import Modal from '@/components/Modal'
+import Table from '@/components/Table'
 import { View, Trash } from 'lucide-react'
 import Delete from '@/components/deleteModal/Delete'
 import {

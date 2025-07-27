@@ -1,8 +1,8 @@
 'use client'
 
 import { useCallback, useState } from 'react'
-import Modal from '@/components/UI/Modal'
-import Table from '@/components/UI/Table'
+import Modal from '@/components/Modal'
+import Table from '@/components/Table'
 import { Edit, Trash, View } from 'lucide-react'
 import { useGetProjectsQuery } from '@/features/projects/projectApi'
 import AddProject from '@/components/projects/AddProject'
